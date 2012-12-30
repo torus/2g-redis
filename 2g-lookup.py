@@ -12,19 +12,21 @@ def hashpath(path):
 def lookup(path, phrase):
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
     args = []
+    score = {}
     for i in range(0, len(phrase.rstrip()) - 1):
         h = hashpath(path)
         seg = phrase[i:i+2]
         key = "2g:index:" + h + ":" + seg
         print key
 
-        args.append(key)
+        res = r.zrange(key, 0, -1)
+        for i in res:
+            score[i] = (score.has_key(i) and score[i] or 0) + 1
 
-    r.zinterstore("tmp", args)
-    lines = r.zrange("tmp", 0, -1)
-    r.delete("tmp")
-
-    show_lines(path, lines)
+    intermed = sorted(score.items(), key=lambda x: x[1], reverse=True)
+    print intermed
+    lines = [x[0] for x in intermed[0:5]]
+    show_lines(path, sorted(lines))
 
 def show_lines(path, lines):
     infile = open(path, "rb")
@@ -38,4 +40,4 @@ def show_lines(path, lines):
                 break
         linecount += 1
 
-lookup("./2g-redis.py", "pos")
+lookup("./2g-redis.py", "normpath")
