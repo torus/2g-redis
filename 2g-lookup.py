@@ -38,4 +38,4 @@ def show_lines(path, lines):
                 break
         linecount += 1
 
-lookup("./2g-redis.py", "path")
+lookup("./2g-redis.py", "pos")
