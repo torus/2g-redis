@@ -18,7 +18,7 @@ def index(path):
     f = open(path, "rb")
 
     for line in f.readlines():
-        for pos in range(0, len(line), 2):
+        for pos in range(0, len(line) - 1):
             key = "2g:index:" + h + ":" + line[pos:pos+2]
             r.zadd(key, linenum, linenum)
         linenum += 1
