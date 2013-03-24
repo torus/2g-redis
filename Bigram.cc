@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <ostream>
 
 #include "Bigram.hh"
 
@@ -15,8 +16,25 @@ void Dictionary::add(Record)
 {
 }
 
-Record::Record(int char1, int char2, const std::string &fileid, unsigned int position)
+std::set<Position>
+Dictionary::search(const std::string &text) const
 {
+    return std::set<Position>();
+}
+
+Record::Record(int char1, int char2, const Position &pos)
+{
+}
+
+bool Position::operator==(const Position &pos) const
+{
+    return this == &pos || pos.docid_ == docid_ && pos.position_ == position_;
+}
+
+std::ostream& operator<<(std::ostream &os, const Position& pos)
+{
+    os << "Bigram::Position(" << pos.docid() << ", " << pos.position() << ")";
+    return os;
 }
 
 std::vector<int> Bigram::disassemble(const std::string &text)

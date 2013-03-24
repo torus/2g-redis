@@ -1,7 +1,7 @@
 GXX = g++-mp-4.8 -std=c++11
 
-CFLAGS = $(shell cppunit-config --cflags) -g
-LIBS = $(shell cppunit-config --libs)
+CFLAGS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --cflags) -g
+LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs)
 
 CCFILES = $(wildcard *.cc)
 
