@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "Bigram.hh"
@@ -96,10 +97,12 @@ void BigramTest::test_search() {
 }
 
 void BigramTest::test_sqlite() {
-    // Bigram::SQLiteDriver drv("test.sqlite");
-    // Bigram::Dictionary dict(drv);
+    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test.sqlite"));
+    Bigram::Dictionary dict(drv);
 
-    // dict.addDocument();
+    std::ifstream is("test/lipsum.txt");
+
+    dict.addDocument(is);
 }
 
 // Local Variables:

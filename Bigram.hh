@@ -23,8 +23,20 @@ namespace Bigram
         Record();
     };
 
+    class Driver {
+    };
+    class MemoryDriver : public Driver {
+    };
+    class SQLiteDriver : public Driver {
+    public:
+        SQLiteDriver(const std::string &filename) {}
+    };
+
     class Dictionary {
     public:
+        Dictionary(std::shared_ptr<Driver> drv);
+        Dictionary() {}
+        void addDocument(std::istream &is);
         std::set<Record> lookup(int char1, int char2) const;
         void add(Record);
         std::set<Position> search(const std::string &text) const;

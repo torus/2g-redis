@@ -2,10 +2,20 @@
 #include <vector>
 #include <set>
 #include <ostream>
+#include <istream>
+#include <memory>
 
 #include "Bigram.hh"
 
 using namespace Bigram;
+
+Dictionary::Dictionary(std::shared_ptr<Driver> drv)
+{
+}
+
+void Dictionary::addDocument(std::istream &is)
+{
+}
 
 std::set<Record> Dictionary::lookup(int char1, int char2) const
 {
