@@ -48,10 +48,6 @@ void BigramTest::tearDown() {
 }
 
 void BigramTest::test_add() {
-    int c = 97;
-    CPPUNIT_ASSERT_EQUAL(c, 65);
-
-
     // fileid may be a hash value of the input file
     std::string fileid = "xfile";
     // position in byte
@@ -60,6 +56,8 @@ void BigramTest::test_add() {
     dict_->add(rec);
 
     std::set<Bigram::Record> result = dict_->lookup('h', 'o');
+    CPPUNIT_ASSERT(result.size() > 0);
+    CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), rec);
     CPPUNIT_ASSERT(result.find(rec) != result.end());
 }
 
