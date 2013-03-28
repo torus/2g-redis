@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <ostream>
 #include <istream>
 #include <memory>
@@ -37,6 +38,16 @@ void Dictionary::add(const Record &rec)
 std::set<Position>
 Dictionary::search(const std::string &text) const
 {
+    std::map<Position, int> map;
+
+    auto chars = disassemble(text);
+    for (int i = 0; i < chars.size() - 1; i ++) {
+        auto recs = lookup(chars[i].first, chars[i + 1].first);
+        for (auto rec : recs) {
+            map[rec.position()] = i;
+        }
+    }
+
     return std::set<Position>();
 }
 
@@ -89,14 +100,14 @@ std::ostream& operator<<(std::ostream &os, const Record& rec)
     return os;
 }
 
-std::vector<int> Bigram::disassemble(const std::string &text)
+std::vector<std::pair<CodePoint, size_t>> Bigram::disassemble(const std::string &text)
 {
     auto it = text.cbegin();
     auto end = text.cend();
-    std::vector<int> dest;
+    std::vector<std::pair<CodePoint, size_t>> dest;
     while (it != end) {
         int cp = utf8::next(it, end);
-        dest.push_back(cp);
+        dest.push_back(std::pair<CodePoint, size_t>(CodePoint(cp), it - text.cbegin()));
     }
     return dest;
 }

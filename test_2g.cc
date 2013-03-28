@@ -64,21 +64,21 @@ void BigramTest::test_add() {
 void BigramTest::test_disassemble() {
     std::string text = "hogefuga";
 
-    std::vector<int> chars = Bigram::disassemble(text);
+    auto chars = Bigram::disassemble(text);
 
     CPPUNIT_ASSERT_EQUAL(8, int(chars.size()));
-    CPPUNIT_ASSERT_EQUAL(chars[0], int('h'));
-    CPPUNIT_ASSERT_EQUAL(chars[1], int('o'));
-    CPPUNIT_ASSERT_EQUAL(chars[2], int('g'));
-    CPPUNIT_ASSERT_EQUAL(chars[3], int('e'));
+    CPPUNIT_ASSERT_EQUAL(int(chars[0].first), int('h'));
+    CPPUNIT_ASSERT_EQUAL(int(chars[1].first), int('o'));
+    CPPUNIT_ASSERT_EQUAL(int(chars[2].first), int('g'));
+    CPPUNIT_ASSERT_EQUAL(int(chars[3].first), int('e'));
 
     std::string text_k = "漢字カタカナ";
 
-    std::vector<int> chars_k = Bigram::disassemble(text_k);
+    auto chars_k = Bigram::disassemble(text_k);
 
     CPPUNIT_ASSERT_EQUAL(6, int(chars_k.size()));
-    CPPUNIT_ASSERT_EQUAL(chars_k[0], 28450);
-    CPPUNIT_ASSERT_EQUAL(chars_k[1], 23383);
+    CPPUNIT_ASSERT_EQUAL(int(chars_k[0].first), 28450);
+    CPPUNIT_ASSERT_EQUAL(int(chars_k[1].first), 23383);
 }
 
 void BigramTest::test_add_text() {
@@ -87,7 +87,8 @@ void BigramTest::test_add_text() {
     for (auto it = chars.cbegin();
          it != chars.cend() && (it + 1) != chars.cend();
          it ++, count ++) {
-        Bigram::Record rec(*it, *(it + 1), Bigram::Position(fileid_, count));
+        Bigram::Record rec((*it).first, (*(it + 1)).first,
+                           Bigram::Position(fileid_, count));
         dict_->add(rec);
     }
 }

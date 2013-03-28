@@ -65,7 +65,15 @@ namespace Bigram
         std::shared_ptr<Driver> driver_;
     };
 
-    std::vector<int> disassemble(const std::string &text);
+    class CodePoint {
+    public:
+        CodePoint(int cp) : value_(cp) {}
+        operator int() const {return value_;}
+    private:
+        CodePoint();
+        int value_;
+    };
+    std::vector<std::pair<CodePoint, size_t>> disassemble(const std::string &text);
 }
 
 std::ostream& operator<<(std::ostream &os, const Bigram::Position& pos);
