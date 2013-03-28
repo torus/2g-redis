@@ -5,6 +5,7 @@
 #include <istream>
 #include <memory>
 
+#include "utf8/source/utf8.h"
 #include "Bigram.hh"
 
 using namespace Bigram;
@@ -90,7 +91,14 @@ std::ostream& operator<<(std::ostream &os, const Record& rec)
 
 std::vector<int> Bigram::disassemble(const std::string &text)
 {
-    return std::vector<int>();
+    auto it = text.cbegin();
+    auto end = text.cend();
+    std::vector<int> dest;
+    while (it != end) {
+        int cp = utf8::next(it, end);
+        dest.push_back(cp);
+    }
+    return dest;
 }
 
 void MemoryDriver::add(const Record &rec)
