@@ -71,6 +71,14 @@ void BigramTest::test_disassemble() {
     CPPUNIT_ASSERT_EQUAL(chars[1], int('o'));
     CPPUNIT_ASSERT_EQUAL(chars[2], int('g'));
     CPPUNIT_ASSERT_EQUAL(chars[3], int('e'));
+
+    std::string text_k = "漢字カタカナ";
+
+    std::vector<int> chars_k = Bigram::disassemble(text_k);
+
+    CPPUNIT_ASSERT_EQUAL(6, int(chars_k.size()));
+    CPPUNIT_ASSERT_EQUAL(chars_k[0], 28450);
+    CPPUNIT_ASSERT_EQUAL(chars_k[1], 23383);
 }
 
 void BigramTest::test_add_text() {
