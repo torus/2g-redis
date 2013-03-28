@@ -67,18 +67,22 @@ void BigramTest::test_disassemble() {
     auto chars = Bigram::disassemble(text);
 
     CPPUNIT_ASSERT_EQUAL(8, int(chars.size()));
-    CPPUNIT_ASSERT_EQUAL(int(chars[0].first), int('h'));
-    CPPUNIT_ASSERT_EQUAL(int(chars[1].first), int('o'));
-    CPPUNIT_ASSERT_EQUAL(int(chars[2].first), int('g'));
-    CPPUNIT_ASSERT_EQUAL(int(chars[3].first), int('e'));
+    CPPUNIT_ASSERT_EQUAL(int('h'), int(chars[0].first));
+    CPPUNIT_ASSERT_EQUAL(int('o'), int(chars[1].first));
+    CPPUNIT_ASSERT_EQUAL(int('g'), int(chars[2].first));
+    CPPUNIT_ASSERT_EQUAL(int('e'), int(chars[3].first));
+
+    CPPUNIT_ASSERT_EQUAL(size_t(0), chars[0].second);
+    CPPUNIT_ASSERT_EQUAL(size_t(1), chars[1].second);
 
     std::string text_k = "漢字カタカナ";
 
     auto chars_k = Bigram::disassemble(text_k);
 
     CPPUNIT_ASSERT_EQUAL(6, int(chars_k.size()));
-    CPPUNIT_ASSERT_EQUAL(int(chars_k[0].first), 28450);
-    CPPUNIT_ASSERT_EQUAL(int(chars_k[1].first), 23383);
+    CPPUNIT_ASSERT_EQUAL(28450, int(chars_k[0].first));
+    CPPUNIT_ASSERT_EQUAL(23383, int(chars_k[1].first));
+    CPPUNIT_ASSERT_EQUAL(size_t(3), chars_k[1].second);
 }
 
 void BigramTest::test_add_text() {

@@ -106,8 +106,9 @@ std::vector<std::pair<CodePoint, size_t>> Bigram::disassemble(const std::string 
     auto end = text.cend();
     std::vector<std::pair<CodePoint, size_t>> dest;
     while (it != end) {
+        auto offset = it - text.cbegin();
         int cp = utf8::next(it, end);
-        dest.push_back(std::pair<CodePoint, size_t>(CodePoint(cp), it - text.cbegin()));
+        dest.push_back(std::pair<CodePoint, size_t>(CodePoint(cp), offset));
     }
     return dest;
 }
