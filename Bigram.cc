@@ -44,7 +44,9 @@ Dictionary::search(const std::string &text) const
     for (int i = 0; i < chars.size() - 1; i ++) {
         auto recs = lookup(chars[i].first, chars[i + 1].first);
         for (auto rec : recs) {
-            map[rec.position()] = i;
+	    auto offset = rec.position().position() - chars[i].second;
+	    Position pos(rec.position().docid(), offset);
+            map[pos]++;
         }
     }
 

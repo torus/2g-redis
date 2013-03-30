@@ -1,4 +1,4 @@
-GXX = g++-mp-4.8 -std=c++11
+GXX = /usr/local/bin/g++-4.8 -std=c++11
 
 CFLAGS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --cflags) -g
 LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs)
@@ -11,5 +11,8 @@ HHFILES = $(wildcard *.hh)
 test: test-bi
 	./test-bi
 
-test-bi: $(CCFILES) $(HHFILES)
+TAGS: $(CCFILES) $(HHFILES)
+	etags $(CCFILES) $(HHFILES)
+
+test-bi: TAGS
 	$(GXX) -o $@ $(CFLAGS) $(CCFILES) $(LIBS)
