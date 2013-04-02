@@ -7,13 +7,16 @@ namespace Bigram
     public:
         Position(const std::string &docid, unsigned int position)
             : docid_(docid), position_(position) {}
+        Position(const Position &pos)
+            : docid_(pos.docid_), position_(pos.position_) {}
         bool operator==(const Position &pos) const;
         bool operator<(const Position &pos) const;
         std::string docid() const {return docid_;}
         unsigned int position() const {return position_;}
+	// Position& operator=(const Position &src);
     private:
         Position();
-        const std::string docid_;
+        std::string docid_;
         unsigned int position_;
     };
 
@@ -59,7 +62,7 @@ namespace Bigram
         void addDocument(std::istream &is);
         std::set<Record> lookup(int char1, int char2) const;
         void add(const Record &rec);
-        std::set<Position> search(const std::string &text) const;
+        std::list<Position> search(const std::string &text) const;
 
     private:
         std::shared_ptr<Driver> driver_;

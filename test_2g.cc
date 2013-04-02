@@ -1,4 +1,5 @@
 #include <memory>
+#include <list>
 #include <iostream>
 #include <sstream>
 
@@ -10,7 +11,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_disassemble);
     CPPUNIT_TEST(test_add);
     CPPUNIT_TEST(test_add_text);
-    CPPUNIT_TEST(test_search);
+    // CPPUNIT_TEST(test_search);
 
     CPPUNIT_TEST(test_sqlite);
 
@@ -29,13 +30,14 @@ protected:
     void test_disassemble();
     void test_add();
     void test_add_text();
-    void test_search();
+    // void test_search();
     void test_sqlite();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( BigramTest );
 
 void BigramTest::setUp() {
+    // std::cout << "setUp" << std::endl;
     dict_.reset(new Bigram::Dictionary());
 
     text_ = "Cras pulvinar sollicitudin purus sed viverra. "
@@ -95,16 +97,20 @@ void BigramTest::test_add_text() {
                            Bigram::Position(fileid_, count));
         dict_->add(rec);
     }
-}
+    std::set<Bigram::Record> result = dict_->lookup('l', 'v');
+    CPPUNIT_ASSERT_EQUAL(1, int(result.size()));
+// }
 
-void BigramTest::test_search() {
+// void BigramTest::test_search() {
+    {
     std::string word = "land";
     auto result = dict_->search(word);
-    CPPUNIT_ASSERT_EQUAL(int(result.size()), 1);
+    CPPUNIT_ASSERT_EQUAL(1, int(result.size()));
 
     int pos = text_.find(word);
     CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), Bigram::Position(fileid_, pos));
     CPPUNIT_ASSERT(*(result.cbegin()) == Bigram::Position(fileid_, pos));
+    }
 }
 
 void BigramTest::test_sqlite() {

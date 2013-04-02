@@ -1,10 +1,16 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <list>
 #include <map>
 #include <ostream>
 #include <istream>
 #include <memory>
+#include <algorithm>
+#include <utility>
+#include <list>
+#include <iostream>
+#include <iterator>
 
 #include "utf8/source/utf8.h"
 #include "Bigram.hh"
@@ -35,28 +41,48 @@ void Dictionary::add(const Record &rec)
     driver_->add(rec);
 }
 
-std::set<Position>
+std::list<Position>
 Dictionary::search(const std::string &text) const
 {
     std::map<Position, int> map;
 
     auto chars = disassemble(text);
+    std::cout << text << ": " << chars.size() << std::endl;
     for (int i = 0; i < chars.size() - 1; i ++) {
+	std::cout << i << ": " << chars[i].first << " " << chars[i + 1].first << std::endl;
         auto recs = lookup(chars[i].first, chars[i + 1].first);
         for (auto rec : recs) {
+	    std::cout << rec.position().position() << std::endl;
 	    auto offset = rec.position().position() - chars[i].second;
 	    Position pos(rec.position().docid(), offset);
             map[pos]++;
         }
     }
 
-    return std::set<Position>();
+    std::list<std::pair<Position, int>> result(map.cbegin(), map.cend());
+    result.sort([](std::pair<Position, int> &a,
+		   std::pair<Position, int> &b){return a.second < b.second;});
+    std::list<Position> dest;
+    std::transform(result.cbegin(), result.cend(), std::back_inserter(dest),
+		   [](const std::pair<Position, int> &a){
+		       std::cout << "!!" << a.second << " " << a.first << std::endl;
+		       // return Position("hoge", 123);
+		       return a.first;
+		   });
+    std::cout << "count: " << dest.size() << std::endl;
+    return dest;
 }
 
 Record::Record(int char1, int char2, const Position &pos)
     : first_(char1), second_(char2), position_(pos)
 {
 }
+
+// Position& Position::operator=(const Position &src) {
+//     docid_ = src.docid();
+//     position_ = src.position();
+//     return *this;
+// }
 
 bool Position::operator==(const Position &pos) const
 {
@@ -122,6 +148,7 @@ void MemoryDriver::add(const Record &rec)
 
 std::set<Record> MemoryDriver::lookup(int char1, int char2) const
 {
+    std::cout << "MemoryDriver::lookup " << records_.size() << std::endl;
     std::set<Record> dest;
     for (auto &rec : records_) {
         if (rec.first() == char1 && rec.second() == char2)
