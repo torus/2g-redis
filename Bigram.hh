@@ -13,7 +13,6 @@ namespace Bigram
         bool operator<(const Position &pos) const;
         std::string docid() const {return docid_;}
         unsigned int position() const {return position_;}
-	// Position& operator=(const Position &src);
     private:
         Position();
         std::string docid_;
