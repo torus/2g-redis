@@ -96,15 +96,6 @@ void BigramTest::test_add_text() {
 
 void BigramTest::test_search() {
     dict_->add(fileid_, text_, 0);
-    // auto chars = Bigram::disassemble(text_);
-    // int count = 0;
-    // for (auto it = chars.cbegin();
-    //      it != chars.cend() && (it + 1) != chars.cend();
-    //      it ++, count ++) {
-    //     Bigram::Record rec((*it).first, (*(it + 1)).first,
-    //                        Bigram::Position(fileid_, count));
-    //     dict_->add(rec);
-    // }
 
     std::string word = "land";
     auto result = dict_->search(word);
