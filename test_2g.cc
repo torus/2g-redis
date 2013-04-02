@@ -11,7 +11,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_disassemble);
     CPPUNIT_TEST(test_add);
     CPPUNIT_TEST(test_add_text);
-    // CPPUNIT_TEST(test_search);
+    CPPUNIT_TEST(test_search);
 
     CPPUNIT_TEST(test_sqlite);
 
@@ -30,7 +30,7 @@ protected:
     void test_disassemble();
     void test_add();
     void test_add_text();
-    // void test_search();
+    void test_search();
     void test_sqlite();
 };
 
@@ -99,18 +99,25 @@ void BigramTest::test_add_text() {
     }
     std::set<Bigram::Record> result = dict_->lookup('l', 'v');
     CPPUNIT_ASSERT_EQUAL(1, int(result.size()));
-// }
+}
 
-// void BigramTest::test_search() {
-    {
+void BigramTest::test_search() {
+    auto chars = Bigram::disassemble(text_);
+    int count = 0;
+    for (auto it = chars.cbegin();
+         it != chars.cend() && (it + 1) != chars.cend();
+         it ++, count ++) {
+        Bigram::Record rec((*it).first, (*(it + 1)).first,
+                           Bigram::Position(fileid_, count));
+        dict_->add(rec);
+    }
+
     std::string word = "land";
     auto result = dict_->search(word);
     CPPUNIT_ASSERT_EQUAL(1, int(result.size()));
 
     int pos = text_.find(word);
     CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), Bigram::Position(fileid_, pos));
-    CPPUNIT_ASSERT(*(result.cbegin()) == Bigram::Position(fileid_, pos));
-    }
 }
 
 void BigramTest::test_sqlite() {
