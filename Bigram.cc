@@ -35,6 +35,19 @@ std::set<Record> Dictionary::lookup(int char1, int char2) const
     return driver_->lookup(char1, char2);
 }
 
+void Dictionary::add(const std::string &fileid, const std::string &text, size_t offset)
+{
+    auto chars = disassemble(text);
+    int count = 0;
+    for (auto it = chars.cbegin();
+         it != chars.cend() && (it + 1) != chars.cend();
+         it ++, count ++) {
+        Bigram::Record rec((*it).first, (*(it + 1)).first,
+                           Bigram::Position(fileid, count));
+        add(rec);
+    }
+}
+
 void Dictionary::add(const Record &rec)
 {
     driver_->add(rec);

@@ -88,17 +88,19 @@ void BigramTest::test_disassemble() {
 }
 
 void BigramTest::test_add_text() {
-    auto chars = Bigram::disassemble(text_);
-    int count = 0;
-    for (auto it = chars.cbegin();
-         it != chars.cend() && (it + 1) != chars.cend();
-         it ++, count ++) {
-        Bigram::Record rec((*it).first, (*(it + 1)).first,
-                           Bigram::Position(fileid_, count));
-        dict_->add(rec);
-    }
+    // auto chars = Bigram::disassemble(text_);
+    // int count = 0;
+    // for (auto it = chars.cbegin();
+    //      it != chars.cend() && (it + 1) != chars.cend();
+    //      it ++, count ++) {
+    //     Bigram::Record rec((*it).first, (*(it + 1)).first,
+    //                        Bigram::Position(fileid_, count));
+    //     dict_->add(rec);
+    // }
+    dict_->add(fileid_, text_, 0);
     std::set<Bigram::Record> result = dict_->lookup('l', 'v');
     CPPUNIT_ASSERT_EQUAL(1, int(result.size()));
+    CPPUNIT_ASSERT_EQUAL(7, int((*(result.cbegin())).position().position()));
 }
 
 void BigramTest::test_search() {

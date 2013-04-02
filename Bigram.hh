@@ -61,6 +61,7 @@ namespace Bigram
         void addDocument(std::istream &is);
         std::set<Record> lookup(int char1, int char2) const;
         void add(const Record &rec);
+        void add(const std::string &fileid, const std::string &text, size_t offset);
         std::list<Position> search(const std::string &text) const;
 
     private:
