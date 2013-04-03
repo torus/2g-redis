@@ -58,10 +58,10 @@ namespace Bigram
     public:
         Dictionary(std::shared_ptr<Driver> drv);
         Dictionary();
-        void addDocument(std::istream &is);
         std::set<Record> lookup(int char1, int char2) const;
         void add(const Record &rec);
         void add(const std::string &fileid, const std::string &text, size_t offset);
+        void add(const std::string &fileid, std::istream &is);
         std::list<Position> search(const std::string &text) const;
 
     private:

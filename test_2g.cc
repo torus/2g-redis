@@ -12,6 +12,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_add);
     CPPUNIT_TEST(test_add_text);
     CPPUNIT_TEST(test_search);
+    CPPUNIT_TEST(test_add_document);
 
     CPPUNIT_TEST(test_sqlite);
 
@@ -31,6 +32,7 @@ protected:
     void test_add();
     void test_add_text();
     void test_search();
+    void test_add_document();
     void test_sqlite();
 };
 
@@ -105,13 +107,18 @@ void BigramTest::test_search() {
     CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), Bigram::Position(fileid_, pos));
 }
 
+void BigramTest::test_add_document() {
+    std::ifstream is("test/lipsum.txt");
+    dict_->add(fileid_, is);
+
+    auto result = dict_->search("ultrices");
+    CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
+}
+
 void BigramTest::test_sqlite() {
     std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test.sqlite"));
     Bigram::Dictionary dict(drv);
 
-    std::ifstream is("test/lipsum.txt");
-
-    dict.addDocument(is);
 }
 
 // Local Variables:

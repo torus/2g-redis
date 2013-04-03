@@ -26,13 +26,16 @@ Dictionary::Dictionary()
 {
 }
 
-void Dictionary::addDocument(std::istream &is)
-{
-}
-
 std::set<Record> Dictionary::lookup(int char1, int char2) const
 {
     return driver_->lookup(char1, char2);
+}
+
+void Dictionary::add(const std::string &fileid, std::istream &is)
+{
+    std::string line;
+    while (std::getline(is, line))
+	add(fileid, line, 0);
 }
 
 void Dictionary::add(const std::string &fileid, const std::string &text, size_t offset)
@@ -69,8 +72,11 @@ Dictionary::search(const std::string &text) const
     }
 
     std::list<std::pair<Position, int>> result(map.cbegin(), map.cend());
-    result.sort([](std::pair<Position, int> &a,
-		   std::pair<Position, int> &b){return a.second < b.second;});
+    // result.sort([](std::pair<Position, int> &a,
+    // 		   std::pair<Position, int> &b){return a.second < b.second;});
+    result.remove_if([&chars](std::pair<Position, int> elem){
+	    return elem.second < chars.size() - 1;
+	});
     std::list<Position> dest;
     std::transform(result.cbegin(), result.cend(), std::back_inserter(dest),
 		   [](const std::pair<Position, int> &a){
