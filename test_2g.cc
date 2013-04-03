@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <cppunit/extensions/HelperMacros.h>
+#include <sqlite3.h>
 #include "Bigram.hh"
 
 class BigramTest : public CPPUNIT_NS::TestFixture {

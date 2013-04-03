@@ -11,6 +11,8 @@
 #include <list>
 #include <iterator>
 
+#include <sqlite3.h>
+
 #include "utf8/source/utf8.h"
 #include "Bigram.hh"
 
@@ -160,6 +162,14 @@ std::set<Record> MemoryDriver::lookup(int char1, int char2) const
             dest.insert(rec);
     }
     return dest;
+}
+
+SQLiteDriver::SQLiteDriver(const std::string &filename)
+{
+    int rc = sqlite3_open(filename.c_str(), &db_);
+    if (rc) {
+	throw new std::bad_alloc();
+    }
 }
 
 void SQLiteDriver::add(const Record &rec)

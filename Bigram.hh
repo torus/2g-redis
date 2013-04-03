@@ -48,10 +48,12 @@ namespace Bigram
     };
     class SQLiteDriver : public Driver {
     public:
-        SQLiteDriver(const std::string &filename) {}
+        SQLiteDriver(const std::string &filename);
         void add(const Record &rec);
         std::set<Record> lookup(int char1, int char2) const;
     private:
+	SQLiteDriver();
+	sqlite3 *db_;
     };
 
     class Dictionary {

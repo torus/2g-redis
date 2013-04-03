@@ -1,7 +1,7 @@
 GXX = /usr/local/bin/g++-4.8 -std=c++11
 
 CFLAGS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --cflags) -g
-LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs)
+LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs) -lsqlite3
 
 CCFILES = $(wildcard *.cc)
 HHFILES = $(wildcard *.hh)
