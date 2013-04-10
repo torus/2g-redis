@@ -2,6 +2,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
+#include <cstdio>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <sqlite3.h>
@@ -15,6 +16,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_search);
     CPPUNIT_TEST(test_add_document);
 
+    CPPUNIT_TEST(test_sqlite_lookup);
     CPPUNIT_TEST(test_sqlite);
 
     CPPUNIT_TEST_SUITE_END();
@@ -34,6 +36,7 @@ protected:
     void test_add_text();
     void test_search();
     void test_add_document();
+    void test_sqlite_lookup();
     void test_sqlite();
 };
 
@@ -46,6 +49,8 @@ void BigramTest::setUp() {
     text_ = "Cras pulvinar sollicitudin purus sed viverra. "
         "Nunc facilisis odio in mi blandit vel vulputate elit semper.";
     fileid_ = "xxxxxxxxxx";
+
+    
 }
 
 void BigramTest::tearDown() {
@@ -116,10 +121,41 @@ void BigramTest::test_add_document() {
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
 }
 
+void BigramTest::test_sqlite_lookup() {
+    remove("test2.sqlite");
+
+    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test2.sqlite"));
+    Bigram::Dictionary dict(drv);
+
+    // fileid may be a hash value of the input file
+    std::string fileid = "xfile";
+    // position in byte
+    unsigned int position = 12345;
+    Bigram::Record rec('h', 'o', Bigram::Position(fileid, position));
+    dict.add(rec);
+
+    std::set<Bigram::Record> result = dict.lookup('h', 'o');
+    CPPUNIT_ASSERT(result.size() > 0);
+    CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), rec);
+    CPPUNIT_ASSERT(result.find(rec) != result.end());
+}
+
 void BigramTest::test_sqlite() {
+    remove("test.sqlite");
+
     std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test.sqlite"));
     Bigram::Dictionary dict(drv);
 
+    std::ifstream is("test/lipsum.txt");
+
+    try {
+	dict.add(fileid_, is);
+    } catch(const std::string &str) {
+	CPPUNIT_FAIL(str.c_str());
+    }
+
+    auto result = dict.search("ultrices");
+    CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
 }
 
 // Local Variables:

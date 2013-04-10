@@ -5,6 +5,8 @@
 #include <map>
 #include <ostream>
 #include <istream>
+#include <sstream>
+#include <iostream>
 #include <memory>
 #include <algorithm>
 #include <utility>
@@ -36,8 +38,11 @@ std::set<Record> Dictionary::lookup(int char1, int char2) const
 void Dictionary::add(const std::string &fileid, std::istream &is)
 {
     std::string line;
-    while (std::getline(is, line))
-	add(fileid, line, 0);
+    int offset = 0;
+    while (std::getline(is, line)) {
+	add(fileid, line, offset);
+	offset += line.length();
+    }
 }
 
 void Dictionary::add(const std::string &fileid, const std::string &text, size_t offset)
@@ -48,7 +53,7 @@ void Dictionary::add(const std::string &fileid, const std::string &text, size_t 
          it != chars.cend() && (it + 1) != chars.cend();
          it ++, count ++) {
         Bigram::Record rec((*it).first, (*(it + 1)).first,
-                           Bigram::Position(fileid, count));
+                           Bigram::Position(fileid, count + offset));
         add(rec);
     }
 }
@@ -168,15 +173,90 @@ SQLiteDriver::SQLiteDriver(const std::string &filename)
 {
     int rc = sqlite3_open(filename.c_str(), &db_);
     if (rc) {
+	sqlite3_close(db_);
 	throw new std::bad_alloc();
+    }
+
+    std::ostringstream oss;
+    oss << "CREATE TABLE IF NOT EXISTS dictionary ("
+	<< "first INTEGER, "
+	<< "second INTEGER, "
+	<< "docid VARCHAR(20), "
+	<< "position INTEGER, "
+	<< "PRIMARY KEY(first, second, docid, position)"
+	<< ");";
+    char *zErrMsg;
+    rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+    if(rc!=SQLITE_OK){
+	std::string err(zErrMsg);
+	sqlite3_free(zErrMsg);
+	throw err;
     }
 }
 
 void SQLiteDriver::add(const Record &rec)
 {
+    std::ostringstream oss;
+    oss << "INSERT INTO dictionary (first, second, docid, position) VALUES ("
+	<< rec.first() << ", "
+	<< rec.second() << ", "
+	<< "\"" << rec.position().docid() << "\", "
+	<< rec.position().position() << ")";
+
+    // std::cout << oss.str() << std::endl;
+
+    char *zErrMsg;
+    int rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+    if(rc!=SQLITE_OK){
+	std::string err(zErrMsg);
+	sqlite3_free(zErrMsg);
+	throw err;
+    }
 }
 
 std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
 {
-    return std::set<Record>();
+    std::ostringstream oss;
+    oss << "SELECT first, second, docid, position FROM dictionary "
+	<< "WHERE first=" << char1 << " AND second=" << char2;
+
+    std::set<Record> dest;
+
+    struct X {
+	X(std::set<Record> &dest, int c1, int c2) : dest_(dest), c1_(c1), c2_(c2) {
+	}
+	int operator()(int argc, char** argv, char** columns) {
+	    for (int i = 0; i < argc; i ++) {
+		std::string fileid;
+		std::istringstream ost(argv[2]);
+		ost >> fileid;
+		std::istringstream ost2(argv[3]);
+		int pos;
+		ost2 >> pos;
+		dest_.insert(Record(c1_, c2_, Bigram::Position(fileid, pos)));
+	    }
+	    return 0;
+	}
+	int c1_, c2_;
+	std::set<Record> &dest_;
+	static int doit(void* self, int argc, char** argv, char** columns) {
+	    return (*((X*)self))(argc, argv, columns);
+	}
+    } callback(dest, char1, char2);
+
+    char *zErrMsg;
+    int rc = sqlite3_exec(
+	db_, oss.str().c_str(),
+	X::doit,
+	&callback, &zErrMsg);
+
+    if(rc!=SQLITE_OK){
+	std::string err(zErrMsg);
+	sqlite3_free(zErrMsg);
+	throw err;
+    }
+
+    return dest;
 }
