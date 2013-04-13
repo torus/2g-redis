@@ -79,6 +79,8 @@ namespace Bigram
         int value_;
     };
     std::vector<std::pair<CodePoint, size_t>> disassemble(const std::string &text);
+
+    std::string digest_file(const std::string &path);
 }
 
 std::ostream& operator<<(std::ostream &os, const Bigram::Position& pos);

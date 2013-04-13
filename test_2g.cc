@@ -14,6 +14,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_add);
     CPPUNIT_TEST(test_add_text);
     CPPUNIT_TEST(test_search);
+    CPPUNIT_TEST(test_digest_file);
     CPPUNIT_TEST(test_add_document);
 
     CPPUNIT_TEST(test_sqlite_lookup);
@@ -35,6 +36,7 @@ protected:
     void test_add();
     void test_add_text();
     void test_search();
+    void test_digest_file();
     void test_add_document();
     void test_sqlite_lookup();
     void test_sqlite();
@@ -113,9 +115,15 @@ void BigramTest::test_search() {
     CPPUNIT_ASSERT_EQUAL(*(result.cbegin()), Bigram::Position(fileid_, pos));
 }
 
+void BigramTest::test_digest_file() {
+    std::string hash = Bigram::digest_file("test/lipsum.txt");
+    CPPUNIT_ASSERT_EQUAL(std::string("b1f3a9369533e35392b361ba5ecfa3919814d114"), hash);
+}
+
 void BigramTest::test_add_document() {
+    std::string hash = Bigram::digest_file("test/lipsum.txt");
     std::ifstream is("test/lipsum.txt");
-    dict_->add(fileid_, is);
+    dict_->add(hash, is);
 
     auto result = dict_->search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
@@ -127,11 +135,11 @@ void BigramTest::test_sqlite_lookup() {
     std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test2.sqlite"));
     Bigram::Dictionary dict(drv);
 
-    // fileid may be a hash value of the input file
-    std::string fileid = "xfile";
+    // // fileid may be a hash value of the input file
+    // std::string fileid = "xfile";
     // position in byte
     unsigned int position = 12345;
-    Bigram::Record rec('h', 'o', Bigram::Position(fileid, position));
+    Bigram::Record rec('h', 'o', Bigram::Position("", position));
     dict.add(rec);
 
     std::set<Bigram::Record> result = dict.lookup('h', 'o');

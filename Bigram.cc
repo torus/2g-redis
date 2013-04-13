@@ -6,6 +6,7 @@
 #include <ostream>
 #include <istream>
 #include <sstream>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <algorithm>
@@ -14,6 +15,9 @@
 #include <iterator>
 
 #include <sqlite3.h>
+#include <openssl/sha.h>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
 
 #include "utf8/source/utf8.h"
 #include "Bigram.hh"
@@ -38,11 +42,15 @@ std::set<Record> Dictionary::lookup(int char1, int char2) const
 void Dictionary::add(const std::string &fileid, std::istream &is)
 {
     std::string line;
+
     int offset = 0;
+	// std::cout << fileid << std::endl;
+	// std::cout << is.tellg() << std::endl;
     while (std::getline(is, line)) {
 	add(fileid, line, offset);
 	offset += line.length();
     }
+	// std::cout << is.tellg() << std::endl;
 }
 
 void Dictionary::add(const std::string &fileid, const std::string &text, size_t offset)
@@ -259,4 +267,28 @@ std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
     }
 
     return dest;
+}
+
+std::string Bigram::digest_file(const std::string &path)
+{
+    std::ifstream is(path);
+    SHA_CTX c;
+    SHA1_Init(&c);
+
+    std::string line;
+    while (std::getline(is, line)) {
+	SHA1_Update(&c, line.c_str(), line.length());
+    }
+
+    unsigned char md[SHA_DIGEST_LENGTH];
+    SHA1_Final(md, &c);
+    std::ostringstream ost;
+    ost.fill('0');
+    ost.width(2);
+    ost << std::hex;
+    for (auto p = md; p < md + SHA_DIGEST_LENGTH; p ++) {
+	ost << (int)*p;
+    }
+
+    return ost.str();
 }

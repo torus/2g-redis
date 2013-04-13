@@ -1,10 +1,10 @@
 GXX = /usr/local/bin/g++-4.8 -std=c++11
 
 CFLAGS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --cflags) -g
-LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs) -lsqlite3
+LIBS = $(shell $(HOME)/local/cppunit/bin/cppunit-config --libs) -lsqlite3 -lcrypto
 
-CCFILES = $(wildcard *.cc)
-HHFILES = $(wildcard *.hh)
+CCFILES = Bigram.cc test_2g.cc test_main.cc
+HHFILES = Bigram.hh
 
 .PHONY: test
 
