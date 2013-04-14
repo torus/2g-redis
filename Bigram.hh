@@ -53,7 +53,10 @@ namespace Bigram
         std::set<Record> lookup(int char1, int char2) const;
     private:
 	SQLiteDriver();
+	void prepare_insert_statement();
+
 	sqlite3 *db_;
+	sqlite3_stmt *insert_statement_;
     };
 
     class Dictionary {

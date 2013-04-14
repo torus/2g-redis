@@ -178,6 +178,7 @@ std::set<Record> MemoryDriver::lookup(int char1, int char2) const
 }
 
 SQLiteDriver::SQLiteDriver(const std::string &filename)
+    : db_(nullptr), insert_statement_(nullptr)
 {
     int rc = sqlite3_open(filename.c_str(), &db_);
     if (rc) {
@@ -201,27 +202,60 @@ SQLiteDriver::SQLiteDriver(const std::string &filename)
 	sqlite3_free(zErrMsg);
 	throw err;
     }
+
+    try {
+	prepare_insert_statement();
+    } catch (int) {
+	throw std::bad_alloc();
+    }
+}
+
+void SQLiteDriver::prepare_insert_statement()
+{
+    std::ostringstream oss;
+    oss << "INSERT INTO dictionary (first, second, docid, position) VALUES "
+	<< "(?, ?, ?, ?)";
+
+    int rc = sqlite3_prepare_v2(db_, oss.str().c_str(), oss.str().length(),
+				&insert_statement_, nullptr);
+    if (rc != SQLITE_OK) {
+	throw rc;
+    }
 }
 
 void SQLiteDriver::add(const Record &rec)
 {
-    std::ostringstream oss;
-    oss << "INSERT INTO dictionary (first, second, docid, position) VALUES ("
-	<< rec.first() << ", "
-	<< rec.second() << ", "
-	<< "\"" << rec.position().docid() << "\", "
-	<< rec.position().position() << ")";
+    // std::ostringstream oss;
+    // oss << "INSERT INTO dictionary (first, second, docid, position) VALUES ("
+    // 	<< rec.first() << ", "
+    // 	<< rec.second() << ", "
+    // 	<< "\"" << rec.position().docid() << "\", "
+    // 	<< rec.position().position() << ")";
 
     // std::cout << oss.str() << std::endl;
 
-    char *zErrMsg;
-    int rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+    if (sqlite3_bind_int(insert_statement_, 1, rec.first())) throw;
+    // std::cout << " 1" << std::endl;
+    if (sqlite3_bind_int(insert_statement_, 2, rec.second())) throw;
+    // std::cout << " 2" << std::endl;
+    if (sqlite3_bind_text(insert_statement_, 3, rec.position().docid().c_str(),
+			  rec.position().docid().length(), nullptr)) throw;
+    // std::cout << " 3" << std::endl;
+    if (sqlite3_bind_int(insert_statement_, 4, rec.position().position())) throw;
+    // std::cout << " 4" << std::endl;
 
-    if(rc!=SQLITE_OK){
-	std::string err(zErrMsg);
-	sqlite3_free(zErrMsg);
-	throw err;
+    // char *zErrMsg;
+    int rc = sqlite3_step(insert_statement_);
+    // int rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+    if (rc != SQLITE_DONE) {
+	// std::string err(zErrMsg);
+	// sqlite3_free(zErrMsg);
+	std::cout << " error code: " << rc << std::endl;
+	throw rc;
     }
+
+    if (sqlite3_reset(insert_statement_)) throw;
 }
 
 std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
