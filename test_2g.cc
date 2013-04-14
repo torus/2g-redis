@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdio>
+#include <sys/time.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <sqlite3.h>
@@ -156,11 +157,18 @@ void BigramTest::test_sqlite() {
 
     std::ifstream is("test/lipsum.txt");
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     try {
 	dict.add(fileid_, is);
     } catch(const std::string &str) {
 	CPPUNIT_FAIL(str.c_str());
     }
+
+    gettimeofday(&end, NULL);
+    auto ms = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
+    std::cout << " " << ms << " ms ";
 
     auto result = dict.search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
