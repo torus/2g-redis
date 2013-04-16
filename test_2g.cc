@@ -46,14 +46,11 @@ protected:
 CPPUNIT_TEST_SUITE_REGISTRATION( BigramTest );
 
 void BigramTest::setUp() {
-    // std::cout << "setUp" << std::endl;
     dict_.reset(new Bigram::Dictionary());
 
     text_ = "Cras pulvinar sollicitudin purus sed viverra. "
         "Nunc facilisis odio in mi blandit vel vulputate elit semper.";
     fileid_ = "xxxxxxxxxx";
-
-    
 }
 
 void BigramTest::tearDown() {
@@ -122,9 +119,6 @@ void BigramTest::test_digest_file() {
 }
 
 void BigramTest::test_add_document() {
-    // std::string hash = Bigram::digest_file("test/lipsum.txt");
-    // std::ifstream is("test/lipsum.txt");
-    // dict_->add(hash, is);
     dict_->add(Bigram::Path("test/lipsum.txt"));
 
     auto result = dict_->search("ultrices");
@@ -137,9 +131,6 @@ void BigramTest::test_sqlite_lookup() {
     std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test2.sqlite"));
     Bigram::Dictionary dict(drv);
 
-    // // fileid may be a hash value of the input file
-    // std::string fileid = "xfile";
-    // position in byte
     unsigned int position = 12345;
     Bigram::Record rec('h', 'o', Bigram::Position("", position));
     dict.add(rec);

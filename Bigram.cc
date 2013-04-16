@@ -44,13 +44,10 @@ void Dictionary::add(const std::string &fileid, std::istream &is)
     std::string line;
 
     int offset = 0;
-	// std::cout << fileid << std::endl;
-	// std::cout << is.tellg() << std::endl;
     while (std::getline(is, line)) {
 	add(fileid, line, offset);
 	offset += line.length();
     }
-	// std::cout << is.tellg() << std::endl;
 }
 
 void Dictionary::add(const std::string &fileid, const std::string &text, size_t offset)
@@ -94,8 +91,6 @@ Dictionary::search(const std::string &text) const
     }
 
     std::list<std::pair<Position, int>> result(map.cbegin(), map.cend());
-    // result.sort([](std::pair<Position, int> &a,
-    // 		   std::pair<Position, int> &b){return a.second < b.second;});
     result.remove_if([&chars](std::pair<Position, int> elem){
 	    return elem.second < chars.size() - 1;
 	});
@@ -232,32 +227,15 @@ void SQLiteDriver::prepare_insert_statement()
 
 void SQLiteDriver::add(const Record &rec)
 {
-    // std::ostringstream oss;
-    // oss << "INSERT INTO dictionary (first, second, docid, position) VALUES ("
-    // 	<< rec.first() << ", "
-    // 	<< rec.second() << ", "
-    // 	<< "\"" << rec.position().docid() << "\", "
-    // 	<< rec.position().position() << ")";
-
-    // std::cout << oss.str() << std::endl;
-
     if (sqlite3_bind_int(insert_statement_, 1, rec.first())) throw;
-    // std::cout << " 1" << std::endl;
     if (sqlite3_bind_int(insert_statement_, 2, rec.second())) throw;
-    // std::cout << " 2" << std::endl;
     if (sqlite3_bind_text(insert_statement_, 3, rec.position().docid().c_str(),
 			  rec.position().docid().length(), nullptr)) throw;
-    // std::cout << " 3" << std::endl;
     if (sqlite3_bind_int(insert_statement_, 4, rec.position().position())) throw;
-    // std::cout << " 4" << std::endl;
 
-    // char *zErrMsg;
     int rc = sqlite3_step(insert_statement_);
-    // int rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
 
     if (rc != SQLITE_DONE) {
-	// std::string err(zErrMsg);
-	// sqlite3_free(zErrMsg);
 	std::cout << " error code: " << rc << std::endl;
 	throw rc;
     }
