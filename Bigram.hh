@@ -59,6 +59,14 @@ namespace Bigram
 	sqlite3_stmt *insert_statement_;
     };
 
+    class Path {
+    public:
+	Path(const std::string path) : path_(path) {}
+	operator const std::string&() const {return path_;}
+    private:
+	std::string path_;
+    };
+
     class Dictionary {
     public:
         Dictionary(std::shared_ptr<Driver> drv);
@@ -67,6 +75,7 @@ namespace Bigram
         void add(const Record &rec);
         void add(const std::string &fileid, const std::string &text, size_t offset);
         void add(const std::string &fileid, std::istream &is);
+        void add(const Path &filepath);
         std::list<Position> search(const std::string &text) const;
 
     private:

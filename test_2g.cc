@@ -122,9 +122,10 @@ void BigramTest::test_digest_file() {
 }
 
 void BigramTest::test_add_document() {
-    std::string hash = Bigram::digest_file("test/lipsum.txt");
-    std::ifstream is("test/lipsum.txt");
-    dict_->add(hash, is);
+    // std::string hash = Bigram::digest_file("test/lipsum.txt");
+    // std::ifstream is("test/lipsum.txt");
+    // dict_->add(hash, is);
+    dict_->add(Bigram::Path("test/lipsum.txt"));
 
     auto result = dict_->search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());

@@ -66,6 +66,13 @@ void Dictionary::add(const std::string &fileid, const std::string &text, size_t 
     }
 }
 
+void Dictionary::add(const Path &filepath)
+{
+    std::string hash = Bigram::digest_file(filepath);
+    std::ifstream is(filepath);
+    add(hash, is);
+}
+
 void Dictionary::add(const Record &rec)
 {
     driver_->add(rec);
