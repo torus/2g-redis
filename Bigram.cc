@@ -102,6 +102,16 @@ Dictionary::search(const std::string &text) const
     return dest;
 }
 
+void Dictionary::register_path(const Path &path, const std::string &digest)
+{
+    driver_->register_path(path, digest);
+}
+
+std::set<Path> Dictionary::lookup_digest(const std::string &digest)
+{
+    return driver_->lookup_digest(digest);
+}
+
 Record::Record(int char1, int char2, const Position &pos)
     : first_(char1), second_(char2), position_(pos)
 {
@@ -177,6 +187,16 @@ std::set<Record> MemoryDriver::lookup(int char1, int char2) const
             dest.insert(rec);
     }
     return dest;
+}
+
+void MemoryDriver::register_path(const Path &path, const std::string &digest)
+{
+    path_digest_map_[digest].insert(path);
+}
+
+std::set<Path> MemoryDriver::lookup_digest(const std::string &digest)
+{
+    return path_digest_map_[digest];
 }
 
 SQLiteDriver::SQLiteDriver(const std::string &filename)
@@ -286,6 +306,15 @@ std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
     }
 
     return dest;
+}
+
+void SQLiteDriver::register_path(const Path &path, const std::string &digest)
+{
+}
+
+std::set<Path> SQLiteDriver::lookup_digest(const std::string &digest)
+{
+    return std::set<Path>();
 }
 
 std::string Bigram::digest_file(const std::string &path)

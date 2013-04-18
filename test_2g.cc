@@ -17,6 +17,7 @@ class BigramTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_search);
     CPPUNIT_TEST(test_digest_file);
     CPPUNIT_TEST(test_add_document);
+    CPPUNIT_TEST(test_path_digest_map);
 
     CPPUNIT_TEST(test_sqlite_lookup);
     CPPUNIT_TEST(test_sqlite);
@@ -39,6 +40,7 @@ protected:
     void test_search();
     void test_digest_file();
     void test_add_document();
+    void test_path_digest_map();
     void test_sqlite_lookup();
     void test_sqlite();
 };
@@ -123,6 +125,22 @@ void BigramTest::test_add_document() {
 
     auto result = dict_->search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
+
+    auto paths = dict_->lookup_digest("b1f3a9369533e35392b361ba5ecfa3919814d114");
+    CPPUNIT_ASSERT_EQUAL(1, int(paths.size()));
+    CPPUNIT_ASSERT(paths.find(Bigram::Path("test/lipsum.txt")) != paths.end());
+}
+
+void BigramTest::test_path_digest_map() {
+    dict_->register_path(Bigram::Path("test/lipsum.txt"),
+			 "b1f3a9369533e35392b361ba5ecfa3919814d114");
+    dict_->register_path(Bigram::Path("test/another.txt"),
+			 "b1f3a9369533e35392b361ba5ecfa3919814d114");
+
+    auto paths = dict_->lookup_digest("b1f3a9369533e35392b361ba5ecfa3919814d114");
+    CPPUNIT_ASSERT_EQUAL(2, int(paths.size()));
+    CPPUNIT_ASSERT(paths.find(Bigram::Path("test/lipsum.txt")) != paths.end());
+    CPPUNIT_ASSERT(paths.find(Bigram::Path("test/another.txt")) != paths.end());
 }
 
 void BigramTest::test_sqlite_lookup() {

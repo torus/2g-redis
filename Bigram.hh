@@ -34,37 +34,45 @@ namespace Bigram
         Position position_;
     };
 
+    class Path {
+    public:
+	Path(const std::string path) : path_(path) {}
+	operator const std::string&() const {return path_;}
+	bool operator <(const Path &p) const {return path_ < p.path_;}
+    private:
+	std::string path_;
+    };
+
     class Driver {
     public:
         virtual void add(const Record &rec) = 0;
         virtual std::set<Record> lookup(int char1, int char2) const = 0;
+	virtual void register_path(const Path &path, const std::string &digest) = 0;
+	virtual std::set<Path> lookup_digest(const std::string &digest) = 0;
     };
     class MemoryDriver : public Driver {
     public:
         void add(const Record &rec);
         std::set<Record> lookup(int char1, int char2) const;
+	void register_path(const Path &path, const std::string &digest);
+	std::set<Path> lookup_digest(const std::string &digest);
     private:
         std::set<Record> records_;
+	std::map<const std::string, std::set<Path>> path_digest_map_;
     };
     class SQLiteDriver : public Driver {
     public:
         SQLiteDriver(const std::string &filename);
         void add(const Record &rec);
         std::set<Record> lookup(int char1, int char2) const;
+	void register_path(const Path &path, const std::string &digest);
+	std::set<Path> lookup_digest(const std::string &digest);
     private:
 	SQLiteDriver();
 	void prepare_insert_statement();
 
 	sqlite3 *db_;
 	sqlite3_stmt *insert_statement_;
-    };
-
-    class Path {
-    public:
-	Path(const std::string path) : path_(path) {}
-	operator const std::string&() const {return path_;}
-    private:
-	std::string path_;
     };
 
     class Dictionary {
@@ -77,6 +85,8 @@ namespace Bigram
         void add(const std::string &fileid, std::istream &is);
         void add(const Path &filepath);
         std::list<Position> search(const std::string &text) const;
+	void register_path(const Path &path, const std::string &digest);
+	std::set<Path> lookup_digest(const std::string &digest);
 
     private:
         std::shared_ptr<Driver> driver_;
