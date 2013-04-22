@@ -68,6 +68,8 @@ void Dictionary::add(const Path &filepath)
     std::string hash = Bigram::digest_file(filepath);
     std::ifstream is(filepath);
     add(hash, is);
+
+    register_path(filepath, hash);
 }
 
 void Dictionary::add(const Record &rec)
@@ -310,6 +312,18 @@ std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
 
 void SQLiteDriver::register_path(const Path &path, const std::string &digest)
 {
+    std::ostringstream oss;
+    oss << "INSERT INTO path_map (path, digest) "
+	<< "VALUES (\"" << std::string(path) << "\", \"" << digest << "\")";
+
+    char *zErrMsg;
+    int rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+    if(rc!=SQLITE_OK){
+	std::string err(zErrMsg);
+	sqlite3_free(zErrMsg);
+	throw err;
+    }
 }
 
 std::set<Path> SQLiteDriver::lookup_digest(const std::string &digest)
@@ -330,13 +344,16 @@ std::string Bigram::digest_file(const std::string &path)
 
     unsigned char md[SHA_DIGEST_LENGTH];
     SHA1_Final(md, &c);
-    std::ostringstream ost;
-    ost.fill('0');
-    ost.width(2);
-    ost << std::hex;
-    for (auto p = md; p < md + SHA_DIGEST_LENGTH; p ++) {
-	ost << (int)*p;
-    }
 
-    return ost.str();
+    return std::string((const char*)md, SHA_DIGEST_LENGTH);
+
+    // std::ostringstream ost;
+    // ost.fill('0');
+    // ost.width(2);
+    // ost << std::hex;
+    // for (auto p = md; p < md + SHA_DIGEST_LENGTH; p ++) {
+    // 	ost << (int)*p;
+    // }
+
+    // return ost.str();
 }

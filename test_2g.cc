@@ -117,7 +117,9 @@ void BigramTest::test_search() {
 
 void BigramTest::test_digest_file() {
     std::string hash = Bigram::digest_file("test/lipsum.txt");
-    CPPUNIT_ASSERT_EQUAL(std::string("b1f3a9369533e35392b361ba5ecfa3919814d114"), hash);
+    CPPUNIT_ASSERT_EQUAL(std::string("\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+				     "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14"),
+			 hash);
 }
 
 void BigramTest::test_add_document() {
@@ -126,18 +128,22 @@ void BigramTest::test_add_document() {
     auto result = dict_->search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
 
-    auto paths = dict_->lookup_digest("b1f3a9369533e35392b361ba5ecfa3919814d114");
+    auto paths = dict_->lookup_digest("\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+				      "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14");
     CPPUNIT_ASSERT_EQUAL(1, int(paths.size()));
     CPPUNIT_ASSERT(paths.find(Bigram::Path("test/lipsum.txt")) != paths.end());
 }
 
 void BigramTest::test_path_digest_map() {
     dict_->register_path(Bigram::Path("test/lipsum.txt"),
-			 "b1f3a9369533e35392b361ba5ecfa3919814d114");
+			 "\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+			 "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14");
     dict_->register_path(Bigram::Path("test/another.txt"),
-			 "b1f3a9369533e35392b361ba5ecfa3919814d114");
+			 "\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+			 "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14");
 
-    auto paths = dict_->lookup_digest("b1f3a9369533e35392b361ba5ecfa3919814d114");
+    auto paths = dict_->lookup_digest("\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+				      "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14");
     CPPUNIT_ASSERT_EQUAL(2, int(paths.size()));
     CPPUNIT_ASSERT(paths.find(Bigram::Path("test/lipsum.txt")) != paths.end());
     CPPUNIT_ASSERT(paths.find(Bigram::Path("test/another.txt")) != paths.end());
@@ -165,13 +171,11 @@ void BigramTest::test_sqlite() {
     std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test.sqlite"));
     Bigram::Dictionary dict(drv);
 
-    std::ifstream is("test/lipsum.txt");
-
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
     try {
-	dict.add(fileid_, is);
+	dict.add(Bigram::Path("test/lipsum.txt"));
     } catch(const std::string &str) {
 	CPPUNIT_FAIL(str.c_str());
     }
@@ -182,6 +186,15 @@ void BigramTest::test_sqlite() {
 
     auto result = dict.search("ultrices");
     CPPUNIT_ASSERT_EQUAL(size_t(4), result.size());
+    auto it = result.begin();
+    CPPUNIT_ASSERT_EQUAL(std::string("\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+				     "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14"),
+			 (*it).docid());
+
+    auto paths = dict.lookup_digest("\xb1\xf3\xa9\x36\x95\x33\xe3\x53\x92\xb3"
+				    "\x61\xba\x5e\xcf\xa3\x91\x98\x14\xd1\x14");
+    CPPUNIT_ASSERT_EQUAL(1, int(paths.size()));
+    CPPUNIT_ASSERT(paths.find(Bigram::Path("test/lipsum.txt")) != paths.end());
 }
 
 // Local Variables:
