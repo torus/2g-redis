@@ -232,6 +232,23 @@ SQLiteDriver::SQLiteDriver(const std::string &filename)
     } catch (int) {
 	throw std::bad_alloc();
     }
+
+    {
+	std::ostringstream oss;
+	oss << "CREATE TABLE IF NOT EXISTS path_map ("
+	    << "path VARCHAR(255), "
+	    << "docid VARCHAR(20)"
+	    << ");";
+	char *zErrMsg;
+	rc = sqlite3_exec(db_, oss.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+	if(rc!=SQLITE_OK){
+	    std::string err(zErrMsg);
+	    sqlite3_free(zErrMsg);
+	    throw err;
+	}
+
+    }
 }
 
 void SQLiteDriver::prepare_insert_statement()
@@ -313,7 +330,7 @@ std::set<Record> SQLiteDriver::lookup(int char1, int char2) const
 void SQLiteDriver::register_path(const Path &path, const std::string &digest)
 {
     std::ostringstream oss;
-    oss << "INSERT INTO path_map (path, digest) "
+    oss << "INSERT INTO path_map (path, docid) "
 	<< "VALUES (\"" << std::string(path) << "\", \"" << digest << "\")";
 
     char *zErrMsg;
@@ -328,7 +345,45 @@ void SQLiteDriver::register_path(const Path &path, const std::string &digest)
 
 std::set<Path> SQLiteDriver::lookup_digest(const std::string &digest)
 {
-    return std::set<Path>();
+
+    std::ostringstream oss;
+    oss << "SELECT path FROM path_map "
+	<< "WHERE docid=\"" << digest << "\"";
+
+    std::set<Path> dest;
+
+    struct X {
+	X(std::set<Path> &dest) : dest_(dest) {
+	}
+	int operator()(int argc, char** argv, char** columns) {
+	    for (int i = 0; i < argc; i ++) {
+		std::string path;
+		std::istringstream ost(argv[0]);
+		ost >> path;
+		dest_.insert(Path(path));
+	    }
+	    return 0;
+	}
+	int c1_, c2_;
+	std::set<Path> &dest_;
+	static int doit(void* self, int argc, char** argv, char** columns) {
+	    return (*((X*)self))(argc, argv, columns);
+	}
+    } callback(dest);
+
+    char *zErrMsg;
+    int rc = sqlite3_exec(
+	db_, oss.str().c_str(),
+	X::doit,
+	&callback, &zErrMsg);
+
+    if(rc!=SQLITE_OK){
+	std::string err(zErrMsg);
+	sqlite3_free(zErrMsg);
+	throw err;
+    }
+
+    return dest;
 }
 
 std::string Bigram::digest_file(const std::string &path)

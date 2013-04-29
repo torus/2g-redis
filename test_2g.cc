@@ -150,9 +150,9 @@ void BigramTest::test_path_digest_map() {
 }
 
 void BigramTest::test_sqlite_lookup() {
-    remove("test2.sqlite");
+    remove("/Volumes/RAMDISK/test2.sqlite");
 
-    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test2.sqlite"));
+    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("/Volumes/RAMDISK/test2.sqlite"));
     Bigram::Dictionary dict(drv);
 
     unsigned int position = 12345;
@@ -166,9 +166,9 @@ void BigramTest::test_sqlite_lookup() {
 }
 
 void BigramTest::test_sqlite() {
-    remove("test.sqlite");
+    remove("/Volumes/RAMDISK/test.sqlite");
 
-    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("test.sqlite"));
+    std::shared_ptr<Bigram::Driver> drv(new Bigram::SQLiteDriver("/Volumes/RAMDISK/test.sqlite"));
     Bigram::Dictionary dict(drv);
 
     struct timeval start, end;
